@@ -1,0 +1,1232 @@
+<!DOCTYPE html>
+<html lang="hy">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Անդաստակային Ապարատ - Ինտերակտիվ Ուսուցողական Խաղ</title>
+    <!-- Tailwind CSS CDN -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- Google Fonts: Noto Sans Armenian -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+Armenian:wght@300;400;600;700;800&display=swap" rel="stylesheet">
+    <!-- FontAwesome Icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        teal: {
+                            400: '#2dd4bf',
+                            500: '#14b8a6',
+                            600: '#0d9488',
+                            800: '#115e59',
+                            900: '#134e4a'
+                        },
+                        navy: {
+                            800: '#1e293b',
+                            900: '#0f172a',
+                            950: '#020617'
+                        },
+                        gold: {
+                            400: '#facc15',
+                            500: '#eab308',
+                            600: '#ca8a04'
+                        }
+                    },
+                    fontFamily: {
+                        armenian: ['"Noto Sans Armenian"', 'sans-serif']
+                    }
+                }
+            }
+        }
+    </script>
+    <style>
+        body {
+            font-family: 'Noto Sans Armenian', sans-serif;
+            background: linear-gradient(135deg, #0f172a 0%, #1e293b 100%);
+            color: #f8fafc;
+            min-height: 100vh;
+        }
+
+        /* Custom Scrollbars */
+        ::-webkit-scrollbar {
+            width: 8px;
+            height: 8px;
+        }
+        ::-webkit-scrollbar-track {
+            background: #0f172a;
+        }
+        ::-webkit-scrollbar-thumb {
+            background: #0d9488;
+            border-radius: 4px;
+        }
+
+        /* Glowing and Pulse Effects */
+        .glow-teal {
+            box-shadow: 0 0 20px rgba(20, 184, 166, 0.4);
+        }
+        .glow-gold {
+            box-shadow: 0 0 20px rgba(234, 179, 8, 0.4);
+        }
+        
+        .pulse-hotspot {
+            animation: pulse-ring 2s infinite;
+        }
+        @keyframes pulse-ring {
+            0% { transform: scale(0.95); box-shadow: 0 0 0 0 rgba(45, 212, 191, 0.7); }
+            70% { transform: scale(1.1); box-shadow: 0 0 0 12px rgba(45, 212, 191, 0); }
+            100% { transform: scale(0.95); box-shadow: 0 0 0 0 rgba(45, 212, 191, 0); }
+        }
+
+        /* Nystagmus Dizziness Blur Effect */
+        .dizzy-effect {
+            animation: dizzy-shake 0.3s infinite alternate ease-in-out;
+            filter: blur(2px);
+        }
+        @keyframes dizzy-shake {
+            0% { transform: translate(-4px, 2px) rotate(-1deg); }
+            100% { transform: translate(4px, -2px) rotate(1deg); }
+        }
+
+        /* Card Transitions */
+        .tab-btn.active {
+            background-color: #0d9488;
+            color: #ffffff;
+            border-bottom: 4px solid #facc15;
+        }
+    </style>
+</head>
+<body class="flex flex-col min-h-screen text-slate-100 font-armenian select-none">
+
+    <!-- Header Navigation Bar -->
+    <header class="bg-navy-950/80 backdrop-blur-md border-b border-teal-500/20 sticky top-0 z-50 shadow-lg">
+        <div class="max-w-7xl mx-auto px-4 py-3 flex flex-wrap justify-between items-center gap-4">
+            <div class="flex items-center gap-3">
+                <div class="w-10 h-10 rounded-xl bg-gradient-to-tr from-teal-500 to-gold-400 flex items-center justify-center text-navy-950 font-extrabold text-2xl shadow-md">
+                    <i class="fa-solid fa-ear-listen"></i>
+                </div>
+                <div>
+                    <h1 class="text-xl font-bold text-teal-400 tracking-wide">Անդաստակային Ապարատ</h1>
+                    <p class="text-xs text-slate-400">Մարդու հավասարակշռության համակարգի ինտերակտիվ ուղեցույց</p>
+                </div>
+            </div>
+
+            <!-- Web Audio Toggle & Info -->
+            <div class="flex items-center gap-3">
+                <button id="soundToggleBtn" onclick="toggleSound()" class="px-3 py-1.5 rounded-lg bg-slate-800 hover:bg-slate-700 text-xs flex items-center gap-2 border border-slate-700 transition cursor-pointer">
+                    <i class="fa-solid fa-volume-high text-teal-400" id="soundIcon"></i>
+                    <span id="soundText">Ձայնը՝ Միացված</span>
+                </button>
+                <div class="text-xs bg-teal-950/80 border border-teal-500/30 text-teal-300 px-3 py-1.5 rounded-lg">
+                    <i class="fa-solid fa-trophy text-gold-400 mr-1"></i> Միավորներ՝ <span id="globalScore" class="font-bold text-gold-400">0</span>
+                </div>
+            </div>
+        </div>
+
+        <!-- Module Tabs Navigation -->
+        <nav class="max-w-7xl mx-auto px-4 flex overflow-x-auto gap-2 text-sm mt-1 no-scrollbar">
+            <button onclick="switchTab('anatomy')" id="tab-anatomy" class="tab-btn active px-4 py-2.5 rounded-t-lg font-semibold flex items-center gap-2 transition whitespace-nowrap cursor-pointer">
+                <i class="fa-solid fa-brain"></i> 1. Կառուցվածք
+            </button>
+            <button onclick="switchTab('simulator')" id="tab-simulator" class="tab-btn px-4 py-2.5 rounded-t-lg font-semibold flex items-center gap-2 transition whitespace-nowrap cursor-pointer">
+                <i class="fa-solid fa-person-walking-with-cane"></i> 2. Հավասարակշռություն
+            </button>
+            <button onclick="switchTab('otolithGame')" id="tab-otolithGame" class="tab-btn px-4 py-2.5 rounded-t-lg font-semibold flex items-center gap-2 transition whitespace-nowrap cursor-pointer">
+                <i class="fa-solid fa-gem text-gold-400"></i> 3. «Ականջաքարերի» Բուժում (ԲՊՎԳ)
+            </button>
+            <button onclick="switchTab('cases')" id="tab-cases" class="tab-btn px-4 py-2.5 rounded-t-lg font-semibold flex items-center gap-2 transition whitespace-nowrap cursor-pointer">
+                <i class="fa-solid fa-stethoscope text-teal-300"></i> 4. Կլինիկական Օրինակներ
+            </button>
+            <button onclick="switchTab('quiz')" id="tab-quiz" class="tab-btn px-4 py-2.5 rounded-t-lg font-semibold flex items-center gap-2 transition whitespace-nowrap cursor-pointer">
+                <i class="fa-solid fa-circle-question"></i> 5. Քվիզ
+            </button>
+            <button onclick="switchTab('facts')" id="tab-facts" class="tab-btn px-4 py-2.5 rounded-t-lg font-semibold flex items-center gap-2 transition whitespace-nowrap cursor-pointer">
+                <i class="fa-solid fa-lightbulb text-gold-400"></i> 6. Փաստեր
+            </button>
+        </nav>
+    </header>
+
+    <!-- Main Container -->
+    <main class="flex-grow max-w-7xl w-full mx-auto p-4 md:p-6">
+
+        <!-- ==================== MODULE 1: ANATOMY EXPLORER ==================== -->
+        <section id="module-anatomy" class="space-y-6">
+            <div class="bg-navy-800/80 border border-slate-700/60 rounded-2xl p-6 shadow-xl backdrop-blur">
+                <div class="max-w-3xl mb-6">
+                    <h2 class="text-2xl font-bold text-teal-400 mb-2 flex items-center gap-2">
+                        <i class="fa-solid fa-network-wired"></i> Ներքին Ականջի & Անդաստակային Ապարատի Կառուցվածքը
+                    </h2>
+                    <p class="text-slate-300 text-sm leading-relaxed">
+                        Անդաստակային ապարատը տեղակայված է քունքոսկրի խորքում՝ ներքին ականջում: Կտտացրեք ստորև ներկայացված SVG սխեմայի տարրերին կամ կոճակներին՝ դրանց ֆունկցիաները և կառուցվածքը մանրամասն ուսումնասիրելու համար:
+                    </p>
+                </div>
+
+                <div class="grid grid-cols-1 lg:grid-cols-12 gap-6 items-center">
+                    <!-- SVG Diagram Box -->
+                    <div class="lg:col-span-7 bg-navy-950/80 border border-teal-500/30 rounded-xl p-4 flex flex-col items-center justify-center relative min-h-[360px] shadow-inner">
+                        <span class="absolute top-3 left-3 text-xs bg-teal-900/60 text-teal-300 border border-teal-500/40 px-2.5 py-1 rounded-full pointer-events-none">
+                            <i class="fa-solid fa-hand-pointer mr-1"></i> Կտտացրեք մասերին
+                        </span>
+
+                        <!-- Dynamic Interactive SVG Diagram -->
+                        <svg viewBox="0 0 500 400" class="w-full h-auto max-w-[450px] filter drop-shadow-md">
+                            <!-- Background Inner Ear Silhouette -->
+                            <path d="M 120 220 Q 140 180 180 190 T 260 210 Q 300 220 330 260 T 250 340 Z" fill="#1e293b" stroke="#334155" stroke-width="2" opacity="0.5"/>
+
+                            <!-- 3 Semicircular Canals -->
+                            <!-- Anterior Canal -->
+                            <g class="cursor-pointer group" onclick="selectAnatomyPart('canals')">
+                                <path id="svg-anterior" d="M 210 180 C 180 80, 290 70, 270 170" fill="none" stroke="#14b8a6" stroke-width="14" stroke-linecap="round" class="transition-all hover:stroke-teal-400"/>
+                                <path d="M 210 180 C 180 80, 290 70, 270 170" fill="none" stroke="#0d9488" stroke-width="6" stroke-linecap="round"/>
+                                <text x="225" y="75" fill="#facc15" font-size="11" font-weight="bold">Առաջային</text>
+                            </g>
+
+                            <!-- Horizontal Canal -->
+                            <g class="cursor-pointer group" onclick="selectAnatomyPart('canals')">
+                                <path id="svg-horizontal" d="M 270 190 C 370 160, 370 240, 280 230" fill="none" stroke="#14b8a6" stroke-width="14" stroke-linecap="round" class="transition-all hover:stroke-teal-400"/>
+                                <path d="M 270 190 C 370 160, 370 240, 280 230" fill="none" stroke="#0d9488" stroke-width="6" stroke-linecap="round"/>
+                                <text x="350" y="205" fill="#facc15" font-size="11" font-weight="bold">Դրսային</text>
+                            </g>
+
+                            <!-- Posterior Canal -->
+                            <g class="cursor-pointer group" onclick="selectAnatomyPart('canals')">
+                                <path id="svg-posterior" d="M 220 190 C 130 180, 150 290, 240 240" fill="none" stroke="#14b8a6" stroke-width="14" stroke-linecap="round" class="transition-all hover:stroke-teal-400"/>
+                                <path d="M 220 190 C 130 180, 150 290, 240 240" fill="none" stroke="#0d9488" stroke-width="6" stroke-linecap="round"/>
+                                <text x="135" y="260" fill="#facc15" font-size="11" font-weight="bold">Հետին</text>
+                            </g>
+
+                            <!-- Ampullae Enlargements -->
+                            <circle cx="210" cy="180" r="10" fill="#facc15" class="cursor-pointer hover:scale-125 transition" onclick="selectAnatomyPart('ampulla')"/>
+                            <circle cx="270" cy="190" r="10" fill="#facc15" class="cursor-pointer hover:scale-125 transition" onclick="selectAnatomyPart('ampulla')"/>
+                            <circle cx="240" cy="240" r="10" fill="#facc15" class="cursor-pointer hover:scale-125 transition" onclick="selectAnatomyPart('ampulla')"/>
+
+                            <!-- Utricle and Saccule (Otolith Organs) -->
+                            <g class="cursor-pointer group" onclick="selectAnatomyPart('otoliths')">
+                                <!-- Utricle (Ձվաձև պարկիկ) -->
+                                <ellipse cx="250" cy="210" rx="22" ry="16" fill="#38bdf8" stroke="#0284c7" stroke-width="3" class="hover:fill-sky-300 transition"/>
+                                <text x="238" y="214" fill="#0f172a" font-size="10" font-weight="bold">Utricle</text>
+                                
+                                <!-- Saccule (Կլոր պարկիկ) -->
+                                <circle cx="245" cy="245" r="15" fill="#0284c7" stroke="#0369a1" stroke-width="3" class="hover:fill-sky-400 transition"/>
+                                <text x="233" y="249" fill="#ffffff" font-size="9" font-weight="bold">Saccule</text>
+                            </g>
+
+                            <!-- Otolith Crystals (Crystals Dots inside) -->
+                            <circle cx="252" cy="206" r="2.5" fill="#ffffff"/>
+                            <circle cx="258" cy="212" r="2.5" fill="#ffffff"/>
+                            <circle cx="245" cy="210" r="2.5" fill="#ffffff"/>
+                            <circle cx="245" cy="242" r="2.5" fill="#ffffff"/>
+                            <circle cx="248" cy="248" r="2.5" fill="#ffffff"/>
+
+                            <!-- Vestibular Nerve (VIII Cranial Nerve) -->
+                            <g class="cursor-pointer group" onclick="selectAnatomyPart('nerve')">
+                                <path d="M 260 230 Q 320 250, 420 260" fill="none" stroke="#eab308" stroke-width="8" stroke-dasharray="6,3" class="hover:stroke-yellow-300 transition"/>
+                                <path d="M 260 215 Q 330 230, 420 250" fill="none" stroke="#eab308" stroke-width="6" stroke-dasharray="6,3"/>
+                                <text x="330" y="280" fill="#facc15" font-size="11" font-weight="bold">VIII Նյարդ (Vestibular)</text>
+                            </g>
+
+                            <!-- Cochlea outline for context -->
+                            <path d="M 240 260 C 230 310, 180 320, 180 290 C 180 270, 210 275, 205 290" fill="none" stroke="#475569" stroke-width="5" stroke-linecap="round"/>
+                            <text x="160" y="335" fill="#64748b" font-size="10">Խխունջ (Cochlea)</text>
+                        </svg>
+
+                        <div class="mt-2 flex flex-wrap gap-2 justify-center text-xs">
+                            <button onclick="selectAnatomyPart('canals')" class="px-2.5 py-1 rounded bg-teal-900/60 text-teal-300 border border-teal-500/30 hover:bg-teal-800 cursor-pointer transition">3 Խողովակներ</button>
+                            <button onclick="selectAnatomyPart('otoliths')" class="px-2.5 py-1 rounded bg-sky-900/60 text-sky-300 border border-sky-500/30 hover:bg-sky-800 cursor-pointer transition">2 Պարկիկներ (Օտոլիթներ)</button>
+                            <button onclick="selectAnatomyPart('fluids')" class="px-2.5 py-1 rounded bg-indigo-900/60 text-indigo-300 border border-indigo-500/30 hover:bg-indigo-800 cursor-pointer transition">Էնդոլիմֆա / Պերիլիմֆա</button>
+                            <button onclick="selectAnatomyPart('nerve')" class="px-2.5 py-1 rounded bg-yellow-900/60 text-yellow-300 border border-yellow-500/30 hover:bg-yellow-800 cursor-pointer transition">Անդաստակային Նյարդ</button>
+                        </div>
+                    </div>
+
+                    <!-- Details Display Panel -->
+                    <div class="lg:col-span-5 bg-navy-900 border border-slate-700/80 rounded-xl p-5 min-h-[360px] flex flex-col justify-between shadow-lg" id="anatomyDetailsCard">
+                        <!-- Content inserted dynamically -->
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- ==================== MODULE 2: BALANCE SIMULATOR ==================== -->
+        <section id="module-simulator" class="space-y-6 hidden">
+            <div class="bg-navy-800/80 border border-slate-700/60 rounded-2xl p-6 shadow-xl">
+                <div class="flex flex-col md:flex-row justify-between items-start md:items-center gap-4 mb-6">
+                    <div>
+                        <h2 class="text-2xl font-bold text-teal-400 flex items-center gap-2">
+                            <i class="fa-solid fa-scale-balanced"></i> Հավասարակշռության & Հեղուկի Շարժման Սիմուլյատոր
+                        </h2>
+                        <p class="text-slate-300 text-sm">
+                            Շարժեք գլուխը (կարգավորիչով կամ մկնիկով/touch-ով)՝ տեսնելու, թե ինչպես է ներքին հեղուկը (էնդոլիմֆան) տեղաշարժվում, ծռում մազիկները և ակնթարթորեն կայունացնում աչքերի հայացքը (Վեստիբուլո-օկուլյար ռեֆլեքս):
+                        </p>
+                    </div>
+                </div>
+
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                    <!-- Interactive Visual Stage -->
+                    <div class="bg-navy-950 border border-slate-700 rounded-xl p-6 flex flex-col items-center justify-center relative overflow-hidden shadow-inner">
+                        <!-- Head / Eyes Visual Representation -->
+                        <div id="simHeadContainer" class="relative transition-transform duration-100 ease-out flex flex-col items-center justify-center my-6 cursor-grab active:cursor-grabbing">
+                            <!-- Head Outline -->
+                            <div class="w-44 h-52 border-4 border-slate-500 rounded-full bg-slate-900/90 flex flex-col items-center justify-center relative shadow-2xl">
+                                <!-- Eyes Container -->
+                                <div class="flex gap-8 mb-4">
+                                    <!-- Left Eye -->
+                                    <div class="w-10 h-10 bg-white rounded-full flex items-center justify-center relative overflow-hidden border border-slate-400">
+                                        <div id="simPupilLeft" class="w-4 h-4 bg-navy-950 rounded-full transition-transform duration-75"></div>
+                                    </div>
+                                    <!-- Right Eye -->
+                                    <div class="w-10 h-10 bg-white rounded-full flex items-center justify-center relative overflow-hidden border border-slate-400">
+                                        <div id="simPupilRight" class="w-4 h-4 bg-navy-950 rounded-full transition-transform duration-75"></div>
+                                    </div>
+                                </div>
+                                <!-- Nose / Smile -->
+                                <div class="w-2 h-6 bg-slate-600 rounded-full mb-2"></div>
+                                <div class="w-12 h-2 bg-slate-700 rounded-full"></div>
+
+                                <!-- Inner Ear Semicircular Fluid Gauge inside head -->
+                                <div class="absolute -top-3 bg-teal-950/90 border border-teal-500/50 px-3 py-1 rounded-full text-[10px] text-teal-300">
+                                    Ներքին Ականջ
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Fluid Motion Indicator Beam -->
+                        <div class="w-full bg-navy-900 border border-teal-500/30 rounded-lg p-3 text-center">
+                            <div class="flex justify-between text-xs text-slate-400 mb-1 font-semibold">
+                                <span>Թեքում Ձախ (-45°)</span>
+                                <span>Ուղիղ (0°)</span>
+                                <span>Թեքում Ուղիղ/Ուղղահայաց (+45°)</span>
+                            </div>
+                            <input type="range" id="headTiltSlider" min="-45" max="45" value="0" class="w-full h-3 bg-slate-700 rounded-lg appearance-none cursor-pointer accent-teal-400" oninput="updateBalanceSimulation(this.value)">
+                        </div>
+                    </div>
+
+                    <!-- Dynamic Neural & Physical Feedback Panel -->
+                    <div class="bg-navy-900 border border-slate-700 rounded-xl p-5 flex flex-col justify-between space-y-4">
+                        <div>
+                            <h3 class="text-lg font-bold text-gold-400 mb-3 border-b border-slate-700 pb-2 flex items-center gap-2">
+                                <i class="fa-solid fa-microscope"></i> Ինչ է տեղի ունենում այժմ․
+                            </h3>
+                            
+                            <div class="space-y-3 text-sm">
+                                <div class="bg-slate-800/80 p-3 rounded-lg border-l-4 border-teal-400">
+                                    <span class="text-xs text-slate-400 block font-bold uppercase">1. Էնդոլիմֆայի Հոսք (Հեղուկ)</span>
+                                    <p id="simFluidStatus" class="text-slate-200 mt-1">Գլուխը հանգիստ վիճակում է։ Հեղուկը չի շարժվում։</p>
+                                </div>
+
+                                <div class="bg-slate-800/80 p-3 rounded-lg border-l-4 border-sky-400">
+                                    <span class="text-xs text-slate-400 block font-bold uppercase">2. Ռեցեպտորներ (Մազիկավոր Բջիջներ)</span>
+                                    <p id="simHairStatus" class="text-slate-200 mt-1">Մազիկները ուղիղ դիրքում են, ուղարկում են բազային հանգիստ ազդակներ։</p>
+                                </div>
+
+                                <div class="bg-slate-800/80 p-3 rounded-lg border-l-4 border-gold-400">
+                                    <span class="text-xs text-slate-400 block font-bold uppercase">3. Տեսողության Կայունացում (VOR Ռեֆլեքս)</span>
+                                    <p id="simEyeStatus" class="text-slate-200 mt-1">Աչքերը կենտրոնացած են։ Գլխի շարժման դեպքում աչքերը պտտվում են հակառակ ուղղությամբ՝ հայացքը կայուն պահելով։</p>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Interactive Action Buttons for Quick Physics Examples -->
+                        <div class="grid grid-cols-2 gap-2 pt-2">
+                            <button onclick="triggerLinearAccel()" class="px-3 py-2 bg-teal-900/60 hover:bg-teal-800 border border-teal-500/40 rounded-lg text-xs font-semibold text-teal-200 transition flex items-center justify-center gap-1 cursor-pointer">
+                                <i class="fa-solid fa-bolt"></i> Կտրուկ Արագացում (Վերելակ)
+                            </button>
+                            <button id="spinBtn" onclick="triggerSpin()" class="px-3 py-2 bg-indigo-900/60 hover:bg-indigo-800 border border-indigo-500/40 rounded-lg text-xs font-semibold text-indigo-200 transition flex items-center justify-center gap-1 cursor-pointer">
+                                <i class="fa-solid fa-rotate-right"></i> Արագ Պտույտ (Կարուսել)
+                            </button>
+                            <button onclick="triggerBaranyTest()" class="px-3 py-2 bg-sky-900/60 hover:bg-sky-800 border border-sky-500/40 rounded-lg text-xs font-semibold text-sky-200 transition flex items-center justify-center gap-1 col-span-1 cursor-pointer">
+                                <i class="fa-solid fa-snowflake"></i> Բարանյայի Փորձ (Սառը Ջուր)
+                            </button>
+                            <button onclick="triggerMotionConflict()" class="px-3 py-2 bg-rose-900/60 hover:bg-rose-800 border border-rose-500/40 rounded-lg text-xs font-semibold text-rose-200 transition flex items-center justify-center gap-1 col-span-1 cursor-pointer">
+                                <i class="fa-solid fa-car"></i> Տրանսպորտում (Կոնֆլիկտ)
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- ==================== MODULE 3: OTOLITH RECOVERY MINI-GAME ==================== -->
+        <section id="module-otolithGame" class="space-y-6 hidden">
+            <div class="bg-navy-800/80 border border-slate-700/60 rounded-2xl p-6 shadow-xl">
+                <div class="max-w-3xl mb-4">
+                    <div class="flex items-center gap-2">
+                        <span class="bg-gold-500/20 text-gold-400 border border-gold-500/40 text-xs px-2.5 py-0.5 rounded-full font-bold">Բժշկական Սիմուլյատոր</span>
+                        <h2 class="text-2xl font-bold text-teal-400">«Ականջաքարերի» (Օտոլիթների) Վերականգնում (ԲՊՎԳ / BPPV)</h2>
+                    </div>
+                    <p class="text-slate-300 text-sm mt-1">
+                        **Խնդիրը․** Պարկիկներից պոկված կալցիումի բյուրեղները (օտոլիթները) ընկել են կիսաշրջանաձև խողովակի մեջ՝ առաջացնելով ուժեղ գլխապտույտ (նիստագմ): 
+                        **Ձեր նպատակն է․** Կատարել գլխի ճիշտ թեքումների հաջորդականություն (Էպլիի կամ Սեմոնտի մանևր)՝ քարերը հետ ուղղորդելու դեպի պարկիկ (Utricle):
+                    </p>
+                </div>
+
+                <!-- Game Board Container -->
+                <div class="grid grid-cols-1 lg:grid-cols-12 gap-6 items-center">
+                    <!-- Canvas / Visual Area -->
+                    <div id="otolithGameStage" class="lg:col-span-8 bg-navy-950 border border-teal-500/30 rounded-xl p-4 flex flex-col items-center justify-center relative min-h-[380px] shadow-inner overflow-hidden">
+                        
+                        <!-- Dizziness Overlay Effect when active -->
+                        <div id="dizzinessBlurOverlay" class="absolute inset-0 bg-red-950/20 backdrop-blur-[1px] pointer-events-none flex items-center justify-center opacity-0 transition-opacity">
+                            <span class="text-red-400 font-extrabold text-lg bg-navy-950/90 border border-red-500/50 px-4 py-2 rounded-xl dizzy-effect">
+                                <i class="fa-solid fa-triangle-exclamation mr-2"></i> Զգացվում է Ուժեղ Գլխապտույտ!
+                            </span>
+                        </div>
+
+                        <!-- Dynamic Status Banner -->
+                        <div class="absolute top-3 left-3 right-3 flex justify-between items-center bg-navy-900/80 backdrop-blur px-3 py-2 rounded-lg border border-slate-700 text-xs">
+                            <span class="text-slate-300">Քայլ: <strong id="gameStepText" class="text-gold-400">1 / 4 - Գլուխը թեքել 45° աջ</strong></span>
+                            <span class="text-slate-300">Վիճակ: <strong id="gameHealthStatus" class="text-red-400">Գլխապտույտ (ԲՊՎԳ)</strong></span>
+                        </div>
+
+                        <!-- Semicircular Canal Maze Representation -->
+                        <svg id="otolithSvg" viewBox="0 0 400 300" class="w-full h-auto max-w-[380px]">
+                            <!-- Semicircular Canal Path (The Maze) -->
+                            <path d="M 120 220 Q 80 100 200 80 T 280 220" fill="none" stroke="#334155" stroke-width="28" stroke-linecap="round"/>
+                            <path d="M 120 220 Q 80 100 200 80 T 280 220" fill="none" stroke="#0f172a" stroke-width="20" stroke-linecap="round"/>
+
+                            <!-- Safe Target Zone: Utricle Safe Bag -->
+                            <g>
+                                <circle cx="280" cy="220" r="24" fill="#14b8a6" opacity="0.3" stroke="#2dd4bf" stroke-width="2" stroke-dasharray="4,2"/>
+                                <circle cx="280" cy="220" r="18" fill="#0d9488" stroke="#2dd4bf" stroke-width="2"/>
+                                <text x="280" y="224" text-anchor="middle" fill="#ffffff" font-size="10" font-weight="bold">Պարկիկ</text>
+                            </g>
+
+                            <!-- Canal Entry Point -->
+                            <circle cx="120" cy="220" r="14" fill="#f43f5e" opacity="0.2"/>
+                            <text x="120" y="224" text-anchor="middle" fill="#f43f5e" font-size="9">Խողովակ</text>
+
+                            <!-- Loose Otolith Crystals (Animated Moving Elements) -->
+                            <g id="otolithCrystalsGroup" class="transition-all duration-700 ease-in-out" transform="translate(140, 150)">
+                                <circle cx="0" cy="0" r="6" fill="#facc15" stroke="#ffffff" stroke-width="1.5"/>
+                                <circle cx="6" cy="-4" r="5" fill="#facc15" stroke="#ffffff" stroke-width="1.5"/>
+                                <circle cx="-5" cy="5" r="4" fill="#facc15" stroke="#ffffff" stroke-width="1.5"/>
+                            </g>
+                        </svg>
+
+                        <!-- Instruction Alert inside canvas -->
+                        <div id="gameInstructionBox" class="mt-2 text-center text-xs text-slate-300 max-w-xs bg-slate-900/90 border border-slate-700 p-2 rounded-lg">
+                            Սեղմեք ճիշտ թեքման կոճակը՝ քարերը խողովակով դեպի պարկիկ սահեցնելու համար։
+                        </div>
+                    </div>
+
+                    <!-- Controls & Maneuver Buttons -->
+                    <div class="lg:col-span-4 bg-navy-900 border border-slate-700 rounded-xl p-5 flex flex-col justify-between space-y-4">
+                        <div>
+                            <h3 class="text-base font-bold text-teal-400 mb-2 border-b border-slate-700 pb-2 flex items-center gap-2">
+                                <i class="fa-solid fa-arrows-spin"></i> Էպլիի Մանևրի Կառավարում
+                            </h3>
+                            <p class="text-xs text-slate-400 mb-4">
+                                Ընտրեք գլխի ճիշտ դիրքը հերթականությամբ․
+                            </p>
+
+                            <div class="space-y-2.5">
+                                <button onclick="stepManeuver(1)" id="btnManeuver1" class="w-full py-2.5 px-3 bg-slate-800 hover:bg-slate-700 border border-slate-600 rounded-lg text-xs text-left font-semibold flex justify-between items-center transition cursor-pointer">
+                                    <span>1. Թեքել գլուխը 45° դեպի ախտահարված ականջը</span>
+                                    <i class="fa-solid fa-chevron-right text-slate-500"></i>
+                                </button>
+                                <button onclick="stepManeuver(2)" id="btnManeuver2" class="w-full py-2.5 px-3 bg-slate-800 hover:bg-slate-700 border border-slate-600 rounded-lg text-xs text-left font-semibold flex justify-between items-center transition cursor-pointer">
+                                    <span>2. Պառկել հետ և թեքել գլուխը 90° հակառակ կողմ</span>
+                                    <i class="fa-solid fa-chevron-right text-slate-500"></i>
+                                </button>
+                                <button onclick="stepManeuver(3)" id="btnManeuver3" class="w-full py-2.5 px-3 bg-slate-800 hover:bg-slate-700 border border-slate-600 rounded-lg text-xs text-left font-semibold flex justify-between items-center transition cursor-pointer">
+                                    <span>3. Թեքել մարմինն ու գլուխը դեպի հատակ (90°)</span>
+                                    <i class="fa-solid fa-chevron-right text-slate-500"></i>
+                                </button>
+                                <button onclick="stepManeuver(4)" id="btnManeuver4" class="w-full py-2.5 px-3 bg-slate-800 hover:bg-slate-700 border border-slate-600 rounded-lg text-xs text-left font-semibold flex justify-between items-center transition cursor-pointer">
+                                    <span>4. Նստել ուղիղ դիրքով</span>
+                                    <i class="fa-solid fa-chevron-right text-slate-500"></i>
+                                </button>
+                            </div>
+                        </div>
+
+                        <div class="pt-2 border-t border-slate-800 flex justify-between items-center">
+                            <button onclick="resetOtolithGame()" class="px-3 py-1.5 bg-slate-800 hover:bg-slate-700 border border-slate-600 rounded-lg text-xs text-slate-300 flex items-center gap-1 transition cursor-pointer">
+                                <i class="fa-solid fa-rotate-left"></i> Վերասկսել
+                            </button>
+                            <span id="otolithSuccessBadge" class="hidden text-xs bg-emerald-950 text-emerald-400 border border-emerald-500/40 px-2.5 py-1 rounded-full font-bold">
+                                <i class="fa-solid fa-check mr-1"></i> Բուժված է!
+                            </span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- ==================== MODULE 4: CLINICAL CASES / EXAMPLES ==================== -->
+        <section id="module-cases" class="space-y-6 hidden">
+            <div class="bg-navy-800/80 border border-slate-700/60 rounded-2xl p-6 shadow-xl">
+                <h2 class="text-2xl font-bold text-teal-400 mb-2 flex items-center gap-2">
+                    <i class="fa-solid fa-stethoscope"></i> Իրական Կլինիկական & Գործնական Օրինակներ
+                </h2>
+                <p class="text-slate-300 text-sm mb-6">
+                    Ուսումնասիրեք բժշկության մեջ հանդիպող իրական դեպքերն ու փորձերը, որոնք բացատրում են անդաստակային համակարգի աշխատանքը։
+                </p>
+
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                    <!-- Case 1: Barany Test -->
+                    <div class="bg-navy-900 border border-slate-700/80 rounded-xl p-5 space-y-3">
+                        <div class="flex items-center gap-2 text-gold-400 font-bold text-base">
+                            <i class="fa-solid fa-vial"></i> Օրինակ 1․ Բարանյայի Փորձ (Կալորիկ Թեստ)
+                        </div>
+                        <p class="text-xs text-slate-300 leading-relaxed">
+                            <strong>Ի՞նչ են անում․</strong> Բժիշկը պացիենտի արտաքին լսողական անցուղու մեջ լցնում է սառը ($30^\circ C$) կամ տաք ($44^\circ C$) ջուր։
+                        </p>
+                        <div class="bg-slate-800/90 p-3 rounded-lg text-xs space-y-1 text-slate-200">
+                            <p>• <strong>Սառը ջուր․</strong> Էնդոլիմֆան խտանում է, իջնում ցած ցրտից: Նիստագմի արագ բաղադրիչն ուղղվում է <em>հակառակ ականջի կողմը</em> (COWS կանոն: Cold Opposite, Warm Same):</p>
+                            <p>• <strong>Տաք ջուր․</strong> Էնդոլիմֆան տաքանում է, բարձրանում վեր: Նիստագմն ուղղվում է <em>նույն ականջի կողմը</em>:</p>
+                        </div>
+                    </div>
+
+                    <!-- Case 2: Motion Sickness -->
+                    <div class="bg-navy-900 border border-slate-700/80 rounded-xl p-5 space-y-3">
+                        <div class="flex items-center gap-2 text-sky-400 font-bold text-base">
+                            <i class="fa-solid fa-ship"></i> Օրինակ 2․ Տրանսպորտային Հիվանդություն (Կինետոզ)
+                        </div>
+                        <p class="text-xs text-slate-300 leading-relaxed">
+                            <strong>Ի՞նչ է տեղի ունենում․</strong> Դուք նավակում եք կամ նկուղային հարկում առանց պատուհանների, մեքենայի մեջ գիրք եք կարդում։
+                        </p>
+                        <div class="bg-slate-800/90 p-3 rounded-lg text-xs space-y-1 text-slate-200">
+                            <p>• <strong>Անդաստակային ապարատ․</strong> Զգում է ալեկոծության և շարժման բոլոր տատանումները։</p>
+                            <p>• <strong>Տեսողություն․</strong> Ֆիքսված է գրքի կամ անշարժ պատերի վրա, հայտնում է, որ դուք անշարժ եք։</p>
+                            <p>• <strong>Արդյունք․</strong> Ուղեղն ընկալում է այս կոնֆլիկտը որպես «թունավորում» և ակտիվացնում փսխման կենտրոնը։</p>
+                        </div>
+                    </div>
+
+                    <!-- Case 3: Vestibular Neuritis -->
+                    <div class="bg-navy-900 border border-slate-700/80 rounded-xl p-5 space-y-3">
+                        <div class="flex items-center gap-2 text-red-400 font-bold text-base">
+                            <i class="fa-solid fa-virus"></i> Օրինակ 3․ Վեստիբուլյար Նևրիտ (Բորբոքում)
+                        </div>
+                        <p class="text-xs text-slate-300 leading-relaxed">
+                            <strong>Ի՞նչ է տեղի ունենում․</strong> Վիրուսային վարակից հետո վնասվում է մեկ ականջի անդաստակային նյարդը։
+                        </p>
+                        <div class="bg-slate-800/90 p-3 rounded-lg text-xs space-y-1 text-slate-200">
+                            <p>• Առողջ ականջը շարունակում է ուղարկել բազային ազդակներ, իսկ ախտահարվածը՝ ոչ։</p>
+                            <p>• Ուղեղին թվում է, թե գլուխը մշտապես արագ պտտվում է դեպի առողջ կողմը:</p>
+                            <p>• Առաջանում է սուր, շարունակական գլխապտույտ, նիստագմ և հավասարակշռության կորուստ։</p>
+                        </div>
+                    </div>
+
+                    <!-- Case 4: Meniere's Disease -->
+                    <div class="bg-navy-900 border border-slate-700/80 rounded-xl p-5 space-y-3">
+                        <div class="flex items-center gap-2 text-purple-400 font-bold text-base">
+                            <i class="fa-solid fa-water"></i> Օրինակ 4․ Մենիերի Հիվանդություն (Էնդոլիմֆատիկ Ուռուցք)
+                        </div>
+                        <p class="text-xs text-slate-300 leading-relaxed">
+                            <strong>Ի՞նչ է տեղի ունենում․</strong> Ներքին ականջում էնդոլիմֆայի ճնշումը կտրուկ բարձրանում է:
+                        </p>
+                        <div class="bg-slate-800/90 p-3 rounded-lg text-xs space-y-1 text-slate-200">
+                            <p>• <strong>Եռյակ ախտանիշներ․</strong> Նոպայաձև գլխապտույտ, աղմուկ ականջում (տինիտուս) և լսողության թուլացում:</p>
+                            <p>• Ճնշման պատճառով թաղանթները լարվում են՝ խաթարելով մազիկավոր բջիջների աշխատանքը:</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- ==================== MODULE 5: QUIZ MODULE ==================== -->
+        <section id="module-quiz" class="space-y-6 hidden">
+            <div class="bg-navy-800/80 border border-slate-700/60 rounded-2xl p-6 shadow-xl max-w-3xl mx-auto">
+                <div class="flex justify-between items-center border-b border-slate-700 pb-4 mb-6">
+                    <div>
+                        <h2 class="text-2xl font-bold text-teal-400 flex items-center gap-2">
+                            <i class="fa-solid fa-graduation-cap"></i> Գիտելիքի Ստուգման Քվիզ
+                        </h2>
+                        <p class="text-xs text-slate-400">Ստուգեք ձեր գիտելիքները տրամադրված նյութի և օրինակների հիման վրա</p>
+                    </div>
+                    <div class="text-right">
+                        <span class="text-xs text-slate-400 block">Հարց</span>
+                        <span id="quizProgressText" class="text-lg font-extrabold text-gold-400">1 / 6</span>
+                    </div>
+                </div>
+
+                <!-- Quiz Card Box -->
+                <div id="quizBox">
+                    <h3 id="quizQuestionText" class="text-lg font-semibold text-slate-100 mb-5 leading-snug">
+                        <!-- Dynamic Question Text -->
+                    </h3>
+
+                    <!-- Multiple Choice Options -->
+                    <div id="quizOptionsContainer" class="space-y-3 mb-6">
+                        <!-- Options loaded dynamically -->
+                    </div>
+
+                    <!-- Feedback / Explanation Message -->
+                    <div id="quizExplanation" class="hidden p-4 rounded-xl text-sm mb-5 border">
+                        <!-- Explanation text -->
+                    </div>
+
+                    <!-- Action Next Button -->
+                    <div class="flex justify-between items-center">
+                        <span id="quizStreakText" class="text-xs text-teal-400 font-semibold"><i class="fa-solid fa-fire mr-1"></i> Անխափան պատասխաններ: 0</span>
+                        <button id="quizNextBtn" onclick="nextQuizQuestion()" class="hidden px-5 py-2.5 bg-gradient-to-r from-teal-500 to-teal-600 hover:from-teal-600 hover:to-teal-700 text-navy-950 font-bold rounded-xl shadow-lg transition cursor-pointer">
+                            Հաջորդ Հարցը <i class="fa-solid fa-arrow-right ml-1"></i>
+                        </button>
+                    </div>
+                </div>
+
+                <!-- Quiz Completion Summary (Hidden by default) -->
+                <div id="quizResultsBox" class="hidden text-center py-8 space-y-4">
+                    <div class="w-20 h-20 bg-gold-500/20 text-gold-400 border-2 border-gold-500 rounded-full flex items-center justify-center mx-auto text-4xl shadow-lg">
+                        <i class="fa-solid fa-trophy"></i>
+                    </div>
+                    <h3 class="text-2xl font-bold text-slate-100">Ապրե՛ս: Քվիզն ավարտված է:</h3>
+                    <p class="text-slate-300 text-sm">
+                        Դուք ճիշտ պատասխանեցիք <span id="finalQuizScore" class="font-bold text-teal-400 text-lg">0</span> / <span id="totalQuizCount">6</span> հարցերին:
+                    </p>
+                    <button onclick="restartQuiz()" class="px-6 py-2.5 bg-teal-500 hover:bg-teal-600 text-navy-950 font-bold rounded-xl transition shadow-md cursor-pointer">
+                        <i class="fa-solid fa-rotate-right mr-2"></i> Անցնել Կրկին
+                    </button>
+                </div>
+            </div>
+        </section>
+
+        <!-- ==================== MODULE 6: FUN FACTS & SUMMARY ==================== -->
+        <section id="module-facts" class="space-y-6 hidden">
+            <!-- Header section -->
+            <div class="bg-navy-800/80 border border-slate-700/60 rounded-2xl p-6 shadow-xl">
+                <h2 class="text-2xl font-bold text-teal-400 mb-2 flex items-center gap-2">
+                    <i class="fa-solid fa-lightbulb text-gold-400"></i> Հետաքրքիր Փաստեր & Ախտանիշներ
+                </h2>
+                <p class="text-slate-300 text-sm mb-6">
+                    Բացահայտեք, թե ինչպես է անդաստակային ապարատը ազդում մեր առօրյա կյանքի, տրանսպորտով երթևեկելու և մարզումների վրա:
+                </p>
+
+                <!-- Grid Cards -->
+                <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5">
+                    <!-- Fact Card 1 -->
+                    <div class="bg-navy-900 border border-slate-700/80 rounded-xl p-5 hover:border-teal-500/50 transition group shadow-md">
+                        <div class="w-10 h-10 rounded-lg bg-teal-900/50 text-teal-400 flex items-center justify-center text-xl mb-3 group-hover:scale-110 transition">
+                            <i class="fa-solid fa-eye-slash"></i>
+                        </div>
+                        <h3 class="font-bold text-slate-100 mb-2">Գործում է նաև մթության մեջ</h3>
+                        <p class="text-xs text-slate-300 leading-relaxed">
+                            Անդաստակային ապարատը շարունակում է աշխատել նույնիսկ այն ժամանակ, երբ աչքերը փակ են կամ գտնվում եք լիակատար մթության մեջ։
+                        </p>
+                    </div>
+
+                    <!-- Fact Card 2 -->
+                    <div class="bg-navy-900 border border-slate-700/80 rounded-xl p-5 hover:border-teal-500/50 transition group shadow-md">
+                        <div class="w-10 h-10 rounded-lg bg-sky-900/50 text-sky-400 flex items-center justify-center text-xl mb-3 group-hover:scale-110 transition">
+                            <i class="fa-solid fa-car-side"></i>
+                        </div>
+                        <h3 class="font-bold text-slate-100 mb-2">Տրանսպորտային Հիվանդություն</h3>
+                        <p class="text-xs text-slate-300 leading-relaxed">
+                            Մեքենայով, նավով կամ ինքնաթիռով ճանապարհորդելիս աչքերի և անդաստակային ապարատի հակասական ազդանշանները առաջացնում են «ծովային հիվանդություն» և սրտխառնոց։
+                        </p>
+                    </div>
+
+                    <!-- Fact Card 3 -->
+                    <div class="bg-navy-900 border border-slate-700/80 rounded-xl p-5 hover:border-teal-500/50 transition group shadow-md">
+                        <div class="w-10 h-10 rounded-lg bg-gold-900/50 text-gold-400 flex items-center justify-center text-xl mb-3 group-hover:scale-110 transition">
+                            <i class="fa-solid fa-person-marching"></i>
+                        </div>
+                        <h3 class="font-bold text-slate-100 mb-2">Մարզումներ & Պար</h3>
+                        <p class="text-xs text-slate-300 leading-relaxed">
+                            Պարողներն ու մարմնամարզիկները հատուկ վարժություններով մարզում են անդաստակային համակարգը՝ արագ պտույտների ժամանակ գլխապտույտից խուսափելու համար։
+                        </p>
+                    </div>
+
+                    <!-- Fact Card 4 -->
+                    <div class="bg-navy-900 border border-slate-700/80 rounded-xl p-5 hover:border-teal-500/50 transition group shadow-md">
+                        <div class="w-10 h-10 rounded-lg bg-red-900/50 text-red-400 flex items-center justify-center text-xl mb-3 group-hover:scale-110 transition">
+                            <i class="fa-solid fa-triangle-exclamation"></i>
+                        </div>
+                        <h3 class="font-bold text-slate-100 mb-2">Խանգարման Ախտանիշները</h3>
+                        <p class="text-xs text-slate-300 leading-relaxed">
+                            Բորբոքման կամ վնասվածքի դեպքում առաջանում է սուր գլխապտույտ, քայլվածքի անստայունություն և աչքերի անկառավարելի շարժումներ (նիստագմ)։
+                        </p>
+                    </div>
+
+                    <!-- Fact Card 5 -->
+                    <div class="bg-navy-900 border border-slate-700/80 rounded-xl p-5 hover:border-teal-500/50 transition group shadow-md">
+                        <div class="w-10 h-10 rounded-lg bg-indigo-900/50 text-indigo-400 flex items-center justify-center text-xl mb-3 group-hover:scale-110 transition">
+                            <i class="fa-solid fa-eye"></i>
+                        </div>
+                        <h3 class="font-bold text-slate-100 mb-2">Համագործակցություն</h3>
+                        <p class="text-xs text-slate-300 leading-relaxed">
+                            Անդաստակային ապարատը սերտորեն համագործակցում է աչքերի և մկանների (պրոպրիոցեպցիա) հետ՝ մարմնի կայունությունն ապահովելու համար։
+                        </p>
+                    </div>
+
+                    <!-- Fact Card 6 -->
+                    <div class="bg-navy-900 border border-slate-700/80 rounded-xl p-5 hover:border-teal-500/50 transition group shadow-md">
+                        <div class="w-10 h-10 rounded-lg bg-emerald-900/50 text-emerald-400 flex items-center justify-center text-xl mb-3 group-hover:scale-110 transition">
+                            <i class="fa-solid fa-bullseye"></i>
+                        </div>
+                        <h3 class="font-bold text-slate-100 mb-2">Հայացքի Կայունացում</h3>
+                        <p class="text-xs text-slate-300 leading-relaxed">
+                            Քայլելիս կամ վազելիս ցնցումների ընթացքում այն թույլ է տալիս պահպանել հայացքի ֆոկուսը կոնկրետ առարկայի վրա։
+                        </p>
+                    </div>
+                </div>
+
+                <!-- Summary Conclusion Banner -->
+                <div class="mt-8 bg-gradient-to-r from-teal-950 via-navy-900 to-slate-900 border border-teal-500/40 rounded-xl p-6 text-center">
+                    <h3 class="text-xl font-bold text-teal-300 mb-2">Եզրակացություն</h3>
+                    <p class="text-sm text-slate-200 max-w-3xl mx-auto leading-relaxed">
+                        Անդաստակային ապարատը մարդու զգայական համակարգի անփոխարինելի մասն է։ Առանց դրա քայլելը, վազելը, տարածության մեջ կողմնորոշվելը և մարմնի դիրքը պահպանելը կլինեին անհնարին։
+                    </p>
+                </div>
+            </div>
+        </section>
+
+    </main>
+
+    <!-- Footer -->
+    <footer class="bg-navy-950 border-t border-slate-800 py-4 text-center text-xs text-slate-500 mt-auto">
+        <div class="max-w-7xl mx-auto px-4">
+            Անդաստակային Ապարատի Ինտերակտիվ Ուսուցողական Նախագիծ &bull; HTML5 / CSS3 / JavaScript
+        </div>
+    </footer>
+
+    <!-- JavaScript Logic -->
+    <script>
+        /* ==================== GLOBAL STATE & SOUNDS ==================== */
+        let globalScore = 0;
+        let soundEnabled = true;
+
+        // Web Audio API Synthesizer with Auto-Resume Fix for Browser Policy
+        const AudioCtx = window.AudioContext || window.webkitAudioContext;
+        let audioCtx = null;
+
+        function initAudioContext() {
+            if (!audioCtx) {
+                audioCtx = new AudioCtx();
+            }
+            if (audioCtx.state === 'suspended') {
+                audioCtx.resume();
+            }
+        }
+
+        // Attach global click listener to unlock audio
+        window.addEventListener('click', initAudioContext, { once: true });
+        window.addEventListener('touchstart', initAudioContext, { once: true });
+
+        function playSound(type) {
+            if (!soundEnabled) return;
+            try {
+                initAudioContext();
+                const osc = audioCtx.createOscillator();
+                const gain = audioCtx.createGain();
+                osc.connect(gain);
+                gain.connect(audioCtx.destination);
+
+                const now = audioCtx.currentTime;
+                if (type === 'click') {
+                    osc.frequency.setValueAtTime(400, now);
+                    gain.gain.setValueAtTime(0.05, now);
+                    gain.gain.exponentialRampToValueAtTime(0.001, now + 0.08);
+                    osc.start(now);
+                    osc.stop(now + 0.08);
+                } else if (type === 'correct') {
+                    osc.frequency.setValueAtTime(523.25, now); // C5
+                    osc.frequency.setValueAtTime(659.25, now + 0.08); // E5
+                    gain.gain.setValueAtTime(0.08, now);
+                    gain.gain.exponentialRampToValueAtTime(0.001, now + 0.25);
+                    osc.start(now);
+                    osc.stop(now + 0.25);
+                } else if (type === 'wrong') {
+                    osc.frequency.setValueAtTime(200, now);
+                    gain.gain.setValueAtTime(0.1, now);
+                    gain.gain.exponentialRampToValueAtTime(0.001, now + 0.2);
+                    osc.start(now);
+                    osc.stop(now + 0.2);
+                } else if (type === 'success') {
+                    osc.frequency.setValueAtTime(440, now);
+                    osc.frequency.setValueAtTime(880, now + 0.15);
+                    gain.gain.setValueAtTime(0.1, now);
+                    gain.gain.exponentialRampToValueAtTime(0.001, now + 0.4);
+                    osc.start(now);
+                    osc.stop(now + 0.4);
+                }
+            } catch (e) {
+                console.log("Audio waiting for user interaction.");
+            }
+        }
+
+        function toggleSound() {
+            soundEnabled = !soundEnabled;
+            const icon = document.getElementById('soundIcon');
+            const text = document.getElementById('soundText');
+            if (soundEnabled) {
+                icon.className = "fa-solid fa-volume-high text-teal-400";
+                text.textContent = "Ձայնը՝ Միացված";
+            } else {
+                icon.className = "fa-solid fa-volume-xmark text-slate-500";
+                text.textContent = "Ձայնը՝ Անջատված";
+            }
+        }
+
+        function addScore(pts) {
+            globalScore += pts;
+            document.getElementById('globalScore').textContent = globalScore;
+        }
+
+        /* Navigation Tab Switcher */
+        function switchTab(tabId) {
+            playSound('click');
+            const modules = ['anatomy', 'simulator', 'otolithGame', 'cases', 'quiz', 'facts'];
+            modules.forEach(m => {
+                const modEl = document.getElementById(`module-${m}`);
+                const tabBtn = document.getElementById(`tab-${m}`);
+                if (m === tabId) {
+                    modEl.classList.remove('hidden');
+                    tabBtn.classList.add('active');
+                } else {
+                    modEl.classList.add('hidden');
+                    tabBtn.classList.remove('active');
+                }
+            });
+        }
+
+        /* ==================== MODULE 1: ANATOMY DATA & LOGIC ==================== */
+        const anatomyData = {
+            canals: {
+                title: "3 Կիսաշրջանաձև Խողովակներ",
+                subtitle: "Պտտական շարժումների գրանցում",
+                icon: "fa-circle-notch text-teal-400",
+                description: "Խողովակները տեղակայված են 3 փոխուղղահայաց հարթություններում (առաջային, հետին և դրսային/հորիզոնական): Դրանք արձագանքում են գլխի պտտական շարժումներին (երբ գլխով «այո» կամ «ոչ» եք անում, կամ պտտվում եք):",
+                details: [
+                    "Լցված են էնդոլիմֆա հեղուկով:",
+                    "Ծայրերում ունեն լայնացումներ՝ ամպուլաներ:",
+                    "Գլուխը պտտելիս հեղուկի իներցիոն շարժումը թեքում է ռեցեպտորները:"
+                ]
+            },
+            otoliths: {
+                title: "Օտոլիթային Օրգաններ (2 Պարկիկներ)",
+                subtitle: "Ձվաձև (Utricle) և Կլոր (Saccule) պարկիկներ",
+                icon: "fa-gem text-sky-400",
+                description: "Արձագանքում են ուղիղ գծային արագացմանը (օրինակ՝ վերելակով բարձրանալիս կամ մեքենան կտրուկ տեղից շարժվելիս) և երկրի ձգողականությանը (գրավիտացիային):",
+                details: [
+                    "Մակուլաներ. Զգայուն դաշտեր՝ ծածկված դոնդողանման զանգվածով:",
+                    "Օտոլիթներ (Ականջաքարեր). Կալցիումի կարբոնատի մանրիկ բյուրեղներ:",
+                    "Գլուխը թեքելիս քարերը ծանրության տակ շարժվում են՝ սեղմելով մազիկավոր բջիջներին:"
+                ]
+            },
+            ampulla: {
+                title: "Ամպուլա & Կուպուլա",
+                subtitle: "Պտտական շարժման զգայարան",
+                icon: "fa-bullseye text-gold-400",
+                description: "Յուրաքանչյուր կիսաշրջանաձև խողովակի ծայրին կա լայնացում (ամպուլա), որի ներսում գտնվում է դոնդողե կափույրը՝ կուպուլան:",
+                details: [
+                    "Հեղուկի շարժումը թեքում է կուպուլան:",
+                    "Կուպուլայի թեքումը գրգռում է դրա տակ գտնվող նյարդային մազիկները:"
+                ]
+            },
+            fluids: {
+                title: "Ներքին Հեղուկներ (Էնդոլիմֆա & Պերիլիմֆա)",
+                subtitle: "Հիդրոդինամիկ փոխանցում",
+                icon: "fa-droplet text-indigo-400",
+                description: "Ամբողջ համակարգը լցված է երկու տեսակի հեղուկով, որոնք ապահովում են ազդանշանների փոխանցումն ու պաշտպանությունը:",
+                details: [
+                    "Էնդոլիմֆա. Լցված է թաղանթային խողովակների ներսում ($K^+$ բարձր խտությամբ):",
+                    "Պերիլիմֆա. Գտնվում է արտաքին ոսկրային պատյանի և ներքին թաղանթի միջև՝ կատարելով մեղմացնող (ամորտիզացիոն) դեր:"
+                ]
+            },
+            nerve: {
+                title: "Վեստիբուլյար Նյարդ (VIII Գանգուղեղային Նյարդ)",
+                subtitle: "Կապը գլխուղեղի հետ",
+                icon: "fa-bolt text-yellow-400",
+                description: "Մազիկավոր բջիջներից առաջացած բոլոր ազդակները հավաքվում են անդաստակ-լսողական նյարդով և ուղարկվում ուղեղ:",
+                details: [
+                    "Ազդակները փոխանցվում են ուղեղիկ (cerebellum) և ուղեղի կեղև:",
+                    "Ուղեղն ակնթարթորեն կառավարում է մկանների տոնուսն ու աչքերի շարժումը:"
+                ]
+            }
+        };
+
+        function selectAnatomyPart(partKey) {
+            playSound('click');
+            const data = anatomyData[partKey] || anatomyData['canals'];
+            const card = document.getElementById('anatomyDetailsCard');
+
+            let detailsListHtml = data.details.map(d => `<li class="flex items-start gap-2"><i class="fa-solid fa-check text-teal-400 mt-1 text-xs"></i> <span>${d}</span></li>`).join('');
+
+            card.innerHTML = `
+                <div>
+                    <div class="flex items-center gap-3 mb-2">
+                        <i class="fa-solid ${data.icon} text-2xl"></i>
+                        <div>
+                            <h3 class="text-lg font-bold text-slate-100">${data.title}</h3>
+                            <span class="text-xs text-teal-400 font-semibold">${data.subtitle}</span>
+                        </div>
+                    </div>
+                    <p class="text-xs text-slate-300 leading-relaxed mb-4 border-b border-slate-800 pb-3">${data.description}</p>
+                    
+                    <h4 class="text-xs font-bold uppercase text-slate-400 mb-2">Հիմնական Առանձնահատկությունները․</h4>
+                    <ul class="space-y-2 text-xs text-slate-200">
+                        ${detailsListHtml}
+                    </ul>
+                </div>
+                <div class="mt-4 pt-3 border-t border-slate-800 flex justify-between items-center text-[11px] text-slate-400">
+                    <span>Ինտերակտիվ Անատոմիա</span>
+                    <span class="text-teal-400 font-bold"><i class="fa-solid fa-circle-info mr-1"></i> Ընտրված է</span>
+                </div>
+            `;
+            addScore(2);
+        }
+
+        /* Initialize Anatomy Card */
+        selectAnatomyPart('canals');
+
+        /* ==================== MODULE 2: SIMULATOR LOGIC ==================== */
+        function updateBalanceSimulation(angleDeg) {
+            const angle = parseFloat(angleDeg);
+            const head = document.getElementById('simHeadContainer');
+            const pupilLeft = document.getElementById('simPupilLeft');
+            const pupilRight = document.getElementById('simPupilRight');
+
+            const fluidStatus = document.getElementById('simFluidStatus');
+            const hairStatus = document.getElementById('simHairStatus');
+            const eyeStatus = document.getElementById('simEyeStatus');
+
+            // Rotate head visual
+            head.style.transform = `rotate(${angle}deg)`;
+
+            // Vestibulo-Ocular Reflex (VOR): Eyes rotate opposite to head movement to stabilize gaze
+            const eyeShiftX = - (angle / 45) * 10; 
+            pupilLeft.style.transform = `translateX(${eyeShiftX}px)`;
+            pupilRight.style.transform = `translateX(${eyeShiftX}px)`;
+
+            if (Math.abs(angle) < 5) {
+                fluidStatus.textContent = "Գլուխը հանգիստ վիճակում է։ Էնդոլիմֆայի շարժում չկա։";
+                hairStatus.textContent = "Մազիկները ուղիղ դիրքում են, ուղարկում են հավասարակշռված բազային ազդակներ։";
+                eyeStatus.textContent = "Աչքերը կենտրոնացած են ուղիղ հայացքի վրա։";
+            } else if (angle < 0) {
+                fluidStatus.textContent = `Գլուխը թեքված է ձախ (${Math.abs(angle)}°): Էնդոլիմֆան հոսում է աջ ուղղությամբ (իներցիայով):`;
+                hairStatus.textContent = "Մազիկները թեքվում են, գրգռում են նյարդային վերջույթները (դեպոլյարիզացիա):";
+                eyeStatus.textContent = "VOR ռեֆլեքս․ Աչքերը ավտոմատ շարժվում են աջ՝ հայացքը կայուն պահելու համար:";
+            } else {
+                fluidStatus.textContent = `Գլուխը թեքված է աջ (${angle}°): Էնդոլիմֆան հոսում է ձախ ուղղությամբ (իներցիայով):`;
+                hairStatus.textContent = "Մազիկները թեքվում են հակառակ ուղղությամբ, ազդակներ են հղում ուղեղիկին:";
+                eyeStatus.textContent = "VOR ռեֆլեքս․ Աչքերը ավտոմատ շարժվում են ձախ՝ հայացքը կայուն պահելու համար:";
+            }
+        }
+
+        // Direct Head Drag Interaction Support
+        const simHeadContainer = document.getElementById('simHeadContainer');
+        let isDraggingHead = false;
+
+        function handleHeadMove(clientX) {
+            if (!isDraggingHead) return;
+            const rect = simHeadContainer.getBoundingClientRect();
+            const centerX = rect.left + rect.width / 2;
+            let offset = clientX - centerX;
+            let angle = Math.max(-45, Math.min(45, offset / 2));
+            document.getElementById('headTiltSlider').value = angle;
+            updateBalanceSimulation(angle);
+        }
+
+        simHeadContainer.addEventListener('mousedown', () => isDraggingHead = true);
+        window.addEventListener('mouseup', () => isDraggingHead = false);
+        window.addEventListener('mousemove', (e) => handleHeadMove(e.clientX));
+
+        simHeadContainer.addEventListener('touchstart', () => isDraggingHead = true, {passive: true});
+        window.addEventListener('touchend', () => isDraggingHead = false);
+        window.addEventListener('touchmove', (e) => {
+            if (e.touches.length > 0) handleHeadMove(e.touches[0].clientX);
+        }, {passive: true});
+
+        function triggerLinearAccel() {
+            playSound('correct');
+            const slider = document.getElementById('headTiltSlider');
+            slider.value = 0;
+            updateBalanceSimulation(0);
+
+            const hairStatus = document.getElementById('simHairStatus');
+            const fluidStatus = document.getElementById('simFluidStatus');
+            
+            fluidStatus.textContent = "⚡ Գծային արագացում (Օրինակ՝ վերելակ)! Պարկիկների (Saccule) օտոլիթները ծանրության տակ ետ են մղվում:";
+            hairStatus.textContent = "Օտոլիթային բյուրեղները սեղմում են մազիկներին՝ հայտնելով ուղեղին վերելակի շարժման մասին:";
+            addScore(5);
+        }
+
+        function triggerSpin() {
+            playSound('wrong');
+            const head = document.getElementById('simHeadContainer');
+            head.classList.add('dizzy-effect');
+            
+            const fluidStatus = document.getElementById('simFluidStatus');
+            const eyeStatus = document.getElementById('simEyeStatus');
+
+            fluidStatus.textContent = "🌀 Արագ պտույտ (Օրինակ՝ կարուսել)! Կիսաշրջանաձև խողովակների հեղուկը պտտվում է բարձր արագությամբ:";
+            eyeStatus.textContent = "Աչքերի անկառավարելի շարժում (նիստագմ) և գլխապտույտ!";
+
+            setTimeout(() => {
+                head.classList.remove('dizzy-effect');
+            }, 2500);
+            addScore(5);
+        }
+
+        function triggerBaranyTest() {
+            playSound('correct');
+            const fluidStatus = document.getElementById('simFluidStatus');
+            const eyeStatus = document.getElementById('simEyeStatus');
+            const hairStatus = document.getElementById('simHairStatus');
+
+            fluidStatus.textContent = "❄️ Բարանյայի փորձ․ Աջ ականջի մեջ լցվել է սառը ջուր ($30^\circ C$)։ Էնդոլիմֆան խտանում է ու իջնում ցած:";
+            hairStatus.textContent = "Աջ կողմում ակտիվությունը նվազում է (հիպերպոլյարիզացիա)։";
+            eyeStatus.textContent = "Առաջանում է նիստագմ․ Աչքերի ԱՐԱԳ բաղադրիչը շարժվում է դեպի ՁԱԽ (հակառակ կողմ)։";
+            addScore(5);
+        }
+
+        function triggerMotionConflict() {
+            playSound('wrong');
+            const fluidStatus = document.getElementById('simFluidStatus');
+            const eyeStatus = document.getElementById('simEyeStatus');
+            const hairStatus = document.getElementById('simHairStatus');
+
+            fluidStatus.textContent = "🚗 Տրանսպորտային հիվանդություն․ Մեքենան շարժվում է, անդաստակային ապարատը զգում է արագացում:";
+            hairStatus.textContent = "Աչքերը նայում են անշարժ հեռախոսին կամ գրքին (գրանցում են անշարժություն):";
+            eyeStatus.textContent = "Ուղեղն ընկալում է կոնֆլիկտ աչքերի և ականջի միջև -> Առաջանում է սրտխառնոց!";
+            addScore(5);
+        }
+
+        /* ==================== MODULE 3: OTOLITH GAME LOGIC ==================== */
+        let currentManeuverStep = 1;
+        let isOtolithCured = false;
+
+        const maneuverStepPositions = {
+            1: { x: 140, y: 150, text: "Քայլ 1/4 - Գլուխը թեքված է 45° աջ: Քարերը սկսում են շարժվել հետին խողովակով:" },
+            2: { x: 200, y: 90,  text: "Քայլ 2/4 - Գլուխը թեքված է 90° հակառակ: Քարերը սահում են դեպի կենտրոն:" },
+            3: { x: 250, y: 140, text: "Քայլ 3/4 - Մարմինը թեքված է դեպի հատակ: Քարերը մոտենում են պարկիկի ելքին:" },
+            4: { x: 280, y: 220, text: "Քայլ 4/4 - Նստած ուղիղ դիրք: Քարերն ընկան պարկիկի (Utricle) մեջ! Բուժումն ավարտված է:" }
+        };
+
+        function stepManeuver(stepNum) {
+            if (isOtolithCured) return;
+
+            if (stepNum === currentManeuverStep) {
+                playSound('correct');
+                const pos = maneuverStepPositions[stepNum];
+                const crystals = document.getElementById('otolithCrystalsGroup');
+                crystals.setAttribute('transform', `translate(${pos.x}, ${pos.y})`);
+
+                document.getElementById('gameStepText').textContent = `${stepNum} / 4`;
+                document.getElementById('gameInstructionBox').textContent = pos.text;
+
+                // Highlight buttons
+                for(let i=1; i<=4; i++) {
+                    const btn = document.getElementById(`btnManeuver${i}`);
+                    if(i === stepNum + 1) {
+                        btn.className = "w-full py-2.5 px-3 bg-teal-900/80 hover:bg-teal-800 border border-teal-400 rounded-lg text-xs text-left font-semibold flex justify-between items-center transition text-teal-200 animate-pulse cursor-pointer";
+                    } else if (i <= stepNum) {
+                        btn.className = "w-full py-2.5 px-3 bg-emerald-950/60 border border-emerald-500/40 rounded-lg text-xs text-left font-semibold flex justify-between items-center transition text-emerald-300 cursor-pointer";
+                    } else {
+                        btn.className = "w-full py-2.5 px-3 bg-slate-800 border border-slate-700 rounded-lg text-xs text-left font-semibold flex justify-between items-center transition opacity-60 cursor-pointer";
+                    }
+                }
+
+                currentManeuverStep++;
+
+                if (stepNum === 4) {
+                    // Win state
+                    isOtolithCured = true;
+                    playSound('success');
+                    document.getElementById('gameHealthStatus').textContent = "Առողջ (Առանց գլխապտույտի)";
+                    document.getElementById('gameHealthStatus').className = "text-emerald-400 font-bold";
+                    document.getElementById('otolithSuccessBadge').classList.remove('hidden');
+                    document.getElementById('dizzinessBlurOverlay').style.opacity = '0';
+                    addScore(25);
+                }
+            } else {
+                playSound('wrong');
+                // Wrong sequence button shake / warning overlay
+                const blur = document.getElementById('dizzinessBlurOverlay');
+                blur.style.opacity = '1';
+                setTimeout(() => {
+                    if (!isOtolithCured) blur.style.opacity = '0';
+                }, 1000);
+            }
+        }
+
+        function resetOtolithGame() {
+            playSound('click');
+            currentManeuverStep = 1;
+            isOtolithCured = false;
+            const crystals = document.getElementById('otolithCrystalsGroup');
+            crystals.setAttribute('transform', 'translate(140, 150)');
+
+            document.getElementById('gameStepText').textContent = '1 / 4';
+            document.getElementById('gameHealthStatus').textContent = 'Գլխապտույտ (ԲՊՎԳ)';
+            document.getElementById('gameHealthStatus').className = 'text-red-400 font-bold';
+            document.getElementById('otolithSuccessBadge').classList.add('hidden');
+            document.getElementById('gameInstructionBox').textContent = "Սեղմեք 1-ին քայլի կոճակը՝ Էպլիի մանևրը սկսելու համար:";
+
+            for(let i=1; i<=4; i++) {
+                const btn = document.getElementById(`btnManeuver${i}`);
+                if (i === 1) {
+                    btn.className = "w-full py-2.5 px-3 bg-teal-900/80 hover:bg-teal-800 border border-teal-400 rounded-lg text-xs text-left font-semibold flex justify-between items-center transition text-teal-200 animate-pulse cursor-pointer";
+                } else {
+                    btn.className = "w-full py-2.5 px-3 bg-slate-800 hover:bg-slate-700 border border-slate-600 rounded-lg text-xs text-left font-semibold flex justify-between items-center transition cursor-pointer";
+                }
+            }
+        }
+
+        // Initialize game buttons
+        resetOtolithGame();
+
+        /* ==================== MODULE 5: QUIZ LOGIC ==================== */
+        const quizQuestions = [
+            {
+                question: "Որտե՞ղ է տեղակայված անդաստակային ապարատը:",
+                options: [
+                    "Քունքոսկրի խորքում՝ ներքին ականջում",
+                    "Միջին ականջում՝ լսողական ոսկրիկների մոտ",
+                    "Արտաքին ականջի անցուղում",
+                    "Գլխուղեղի ճակատային բլթում"
+                ],
+                correct: 0,
+                explanation: "Անդաստակային ապարատը տեղակայված է քունքոսկրի խորքում՝ ներքին ականջում:"
+            },
+            {
+                question: "Բարանյայի փորձում աջ ականջի մեջ ՍԱՌԸ ջուր լցնելիս դեպի ո՞ր կողմն է ուղղվում նիստագմի ԱՐԱԳ բաղադրիչը:",
+                options: [
+                    "Դեպի աջ (նույն կողմը)",
+                    "Դեպի ձախ (հակառակ կողմը)",
+                    "Նիստագմ ընդհանրապես չի առաջանում",
+                    "Ուղղահայաց դեպի վեր"
+                ],
+                correct: 1,
+                explanation: "Ըստ COWS կանոնի (Cold Opposite, Warm Same)՝ սառը ջուրը առաջացնում է նիստագմ դեպի հակառակ կողմը (ձախ):"
+            },
+            {
+                question: "Ի՞նչն է հանդիսանում Բարորակ Պարոքսիզմալ Վերտիգոյի (ԲՊՎԳ / BPPV) հիմնական պատճառը:",
+                options: [
+                    "Էնդոլիմֆայի ճնշման իջեցումը",
+                    "Օտոլիթների պոկումը և ընկնելը կիսաշրջանաձև խողովակների մեջ",
+                    "Լսողական նյարդի բորբոքումը",
+                    "Աչքերի մկանների թուլացումը"
+                ],
+                correct: 1,
+                explanation: "ԲՊՎԳ-ն առաջանում է, երբ պարկիկներից պոկված օտոլիթները (կալցիումի քարերը) ընկնում են կիսաշրջանաձև խողովակի մեջ:"
+            },
+            {
+                question: "Ո՞ր ռեֆլեքսն է պատասխանատու գլխի շարժման ժամանակ աչքերի հայացքը ֆիքսված առարկայի վրա պահպանելու համար:",
+                options: [
+                    "Պուպիլար (բբային) ռեֆլեքս",
+                    "Վեստիբուլո-օկուլյար ռեֆլեքս (VOR)",
+                    "Ծնկային ռեֆլեքս",
+                    "Անդաստակ-սպինալ ռեֆլեքս"
+                ],
+                correct: 1,
+                explanation: "Վեստիբուլո-օկուլյար ռեֆլեքսը (VOR) պտտում է աչքերը գլխի շարժմանը հակառակ ուղղությամբ՝ հայացքը կայուն պահելու համար:"
+            },
+            {
+                question: "Ի՞նչ է տեղի ունենում տրանսպորտային հիվանդության (Կինետոզ / Motion Sickness) ժամանակ:",
+                options: [
+                    "Տեսողական և վեստիբուլյար ազդանշանների անհամապատասխանություն (կոնֆլիկտ)",
+                    "Ականջի թմբկաթաղանթի պատռվածք",
+                    "Էնդոլիմֆայի ամբողջական բացակայություն",
+                    "Անդաստակային նյարդի կտրվածք"
+                ],
+                correct: 0,
+                explanation: "Կինետոզը առաջանում է, երբ աչքերի տեսածը և անդաստակային ապարատի զգացած շարժումը չեն համապատասխանում միմյանց:"
+            },
+            {
+                question: "Ո՞ր բուժիչ մանևրն է ամենաարդյունավետը հետին կիսաշրջանաձև խողովակի ԲՊՎԳ-ի ժամանակ քարերը հետ ուղղորդելու համար:",
+                options: [
+                    "Էպլիի մանևր (Epley maneuver)",
+                    "Վալսալվայի փորձ",
+                    "Ռոմբերգի թեստ",
+                    "Կերնիգի ախտանիշ"
+                ],
+                correct: 0,
+                explanation: "Էպլիի (և Սեմոնտի) մանևրները հատուկ գլխի թեքումների հաջորդականություններ են քարերը հետ ուղղորդելու համար:"
+            }
+        ];
+
+        let currentQuizIndex = 0;
+        let quizScore = 0;
+        let quizStreak = 0;
+        let quizAnswered = false;
+
+        function loadQuizQuestion() {
+            quizAnswered = false;
+            const q = quizQuestions[currentQuizIndex];
+            document.getElementById('quizProgressText').textContent = `${currentQuizIndex + 1} / ${quizQuestions.length}`;
+            document.getElementById('quizQuestionText').textContent = q.question;
+            document.getElementById('quizNextBtn').classList.add('hidden');
+
+            const explBox = document.getElementById('quizExplanation');
+            explBox.classList.add('hidden');
+            explBox.className = "hidden p-4 rounded-xl text-sm mb-5 border";
+
+            const optionsContainer = document.getElementById('quizOptionsContainer');
+            optionsContainer.innerHTML = '';
+
+            q.options.forEach((opt, idx) => {
+                const btn = document.createElement('button');
+                btn.className = "w-full text-left p-3.5 bg-slate-800 hover:bg-slate-700 border border-slate-700 rounded-xl text-sm font-medium transition flex items-center gap-3 cursor-pointer";
+                btn.innerHTML = `<span class="w-6 h-6 rounded-full bg-slate-700 flex items-center justify-center text-xs font-bold text-slate-300">${String.fromCharCode(65 + idx)}</span> <span>${opt}</span>`;
+                btn.onclick = () => handleQuizAnswer(idx, btn);
+                optionsContainer.appendChild(btn);
+            });
+        }
+
+        function handleQuizAnswer(selectedIdx, btnElement) {
+            if (quizAnswered) return;
+            quizAnswered = true;
+
+            const q = quizQuestions[currentQuizIndex];
+            const optionsContainer = document.getElementById('quizOptionsContainer');
+            const allBtns = optionsContainer.children;
+            const explBox = document.getElementById('quizExplanation');
+
+            if (selectedIdx === q.correct) {
+                playSound('correct');
+                btnElement.className = "w-full text-left p-3.5 bg-emerald-950/80 border-2 border-emerald-500 rounded-xl text-sm font-medium transition flex items-center gap-3 text-emerald-200 cursor-default";
+                explBox.className = "p-4 rounded-xl text-sm mb-5 border border-emerald-500/40 bg-emerald-950/40 text-emerald-300";
+                explBox.innerHTML = `<i class="fa-solid fa-circle-check mr-2 text-emerald-400"></i> <strong>Ճիշտ է!</strong> ${q.explanation}`;
+                quizScore++;
+                quizStreak++;
+                addScore(10);
+            } else {
+                playSound('wrong');
+                btnElement.className = "w-full text-left p-3.5 bg-red-950/80 border-2 border-red-500 rounded-xl text-sm font-medium transition flex items-center gap-3 text-red-200 cursor-default";
+                allBtns[q.correct].className = "w-full text-left p-3.5 bg-emerald-950/40 border border-emerald-500/50 rounded-xl text-sm font-medium transition flex items-center gap-3 text-emerald-300 cursor-default";
+                explBox.className = "p-4 rounded-xl text-sm mb-5 border border-red-500/40 bg-red-950/40 text-red-300";
+                explBox.innerHTML = `<i class="fa-solid fa-circle-xmark mr-2 text-red-400"></i> <strong>Սխալ է:</strong> ${q.explanation}`;
+                quizStreak = 0;
+            }
+
+            document.getElementById('quizStreakText').innerHTML = `<i class="fa-solid fa-fire mr-1"></i> Անխափան պատասխաններ: ${quizStreak}`;
+            explBox.classList.remove('hidden');
+            document.getElementById('quizNextBtn').classList.remove('hidden');
+        }
+
+        function nextQuizQuestion() {
+            playSound('click');
+            currentQuizIndex++;
+            if (currentQuizIndex < quizQuestions.length) {
+                loadQuizQuestion();
+            } else {
+                // Show final results
+                document.getElementById('quizBox').classList.add('hidden');
+                document.getElementById('quizResultsBox').classList.remove('hidden');
+                document.getElementById('finalQuizScore').textContent = quizScore;
+                document.getElementById('totalQuizCount').textContent = quizQuestions.length;
+                if (quizScore >= 4) playSound('success');
+            }
+        }
+
+        function restartQuiz() {
+            playSound('click');
+            currentQuizIndex = 0;
+            quizScore = 0;
+            quizStreak = 0;
+            document.getElementById('quizStreakText').innerHTML = `<i class="fa-solid fa-fire mr-1"></i> Անխափան պատասխաններ: 0`;
+            document.getElementById('quizBox').classList.remove('hidden');
+            document.getElementById('quizResultsBox').classList.add('hidden');
+            loadQuizQuestion();
+        }
+
+        // Initialize quiz on load
+        loadQuizQuestion();
+
+    </script>
+</body>
+</html>
